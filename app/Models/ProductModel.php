@@ -9,3 +9,4 @@ class ProductModel extends Model
     protected $table = 'dbo.product'; 
     protected $primaryKey = 'id';
 }
+

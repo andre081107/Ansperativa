@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\PeformanceMetrixModel;
 use App\Models\ProductModel;
 use CodeIgniter\Controller;
 
@@ -18,14 +19,14 @@ class ProductController extends Controller
     // Method untuk menampilkan data produk ke dalam view
     public function index()
     {
-        // Mengambil data produk dari model
-        // $products = $this->productModel->findAll();
+        $target = new PeformanceMetrixModel();
 
         // Mengirim data produk ke view
         $data = [
             'title'   => 'Product Traffic',
             // 'product' => $products,  // Mengirim data produk ke view 
         ];
+        $data['targets'] = $target->where('status', 1)->findAll();
 
         return view('pages/product', $data);
     }

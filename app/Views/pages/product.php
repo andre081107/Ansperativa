@@ -1,92 +1,23 @@
 <?= $this->extend("layout/template"); ?>
 
 <?= $this->section('content'); ?>
-<!DOCTYPE html>
-<html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Link ke CSS DataTables versi 2.2.2 -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css">
-    <!-- Sertakan CSS untuk Date Range Picker -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
-    <!-- Select2 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
-    <style>
-        .form-group {
-            display: flex;
-            align-items: center;
-            margin-top: 30px;
-            gap: 10px;
-        }
-
-        .form-group label {
-            font-weight: bold;
-        }
-
-        .form-group input {
-            width: 160px;
-            margin-right: 50px;
-        }
-
-        .form-group select {
-            width: 180px;
-            /* margin-left: 20px; */
-        }
-
-        .date-range-container {
-            display: flex;
-            justify-content: space-evenly;
-            width: 100%;
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            margin-right: 20px;
-            margin-top: 10px;
-        }
-
-        h2 {
-            margin-left: 20px;
-            margin-top: 10px;
-        }
-
-        /* Style for the second table (3x3) */
-        #totalTransactions {
-            margin-top: 20px;
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        #totalTransactions th,
-        #totalTransactions td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-    </style>
-</head>
-
-<body>
     <h2>Tabel Transaksi Produk</h2>
 
     <!-- Date Range and Category Filters -->
     <div class="date-range-container">
         <!-- Date Range Picker -->
         <div class="form-group">
+            <?php foreach ($targets as $target): ?>
+                <input type="text" name="<?= $target['category'];?>" value="<?= $target['amount'] . ';' . $target['category'] ; ?>" id="<?= $target['category'];?>">
+            <?php endforeach; ?>
             <label for="dateRangePicker">Pilih Rentang Tanggal:</label>
-            <input type="text" id="dateRangePicker" name="daterange" />
+            <input placeholder="2025-04-21 - 2025-04-21" type="text" id="dateRangePicker" name="daterange" />
         </div>
 
         <!-- First Category Dropdown (Single Select) -->
         <div class="form-group">
             <label for="selected">Pilih Kategori:</label>
-            <select name="selected" id="selected">
+            <select name="selected" id="category">
                 <option value="category">Category</option>
                 <option value="winning">Winning</option>
                 <option value="traffic">Traffic</option>
@@ -111,12 +42,25 @@
     <table id="myTable" class="display">
         <thead>
             <tr>
-                <th>Product</th>
-                <th>Jumlah Transaksi</th>
-                <th>Harga Jual</th>
-                <th>Harga Beli</th>
-                <th>Profit</th>
-                <th>% Profit</th>
+                <th rowspan="2">Product</th>
+                <th rowspan="2">Jumlah Transaksi</th>
+                <th colspan="2" class="text-center" data-dt-order="disable"><b>Harga Beli</b></th>
+                <th colspan="2" class="text-center" data-dt-order="disable"><b>Harga Jual</b> </th>
+                <th colspan="2" class="text-center" data-dt-order="disable"><b>Profit</b></th>
+                <th colspan="2" class="text-center" data-dt-order="disable">% Profit</th>
+                <th colspan="2" class="text-center" data-dt-order="disable">Margin</th>
+            </tr>
+            <tr>
+                <th>Satuan</th>
+                <th>Jumlah</th>
+                <th>Satuan</th>
+                <th>Jumlah</th>
+                <th>Satuan</th>
+                <th>Jumlah</th>
+                <th>Satuan</th>
+                <th>Jumlah</th>
+                <th>Toko</th>
+                <th>Server</th>
             </tr>
         </thead>
         <tbody id="dataBody"></tbody>
@@ -155,13 +99,13 @@
             };
 
             fetch(urlSummary, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
                 .then(data => {
                     // allData = data;
                     renderTabel(data);
@@ -194,14 +138,16 @@
 
 
         // Function to load data with default parameters (empty filters)
-        function loadData(startDate = '', endDate = '', category = '', secondCategory = '') {
+        function loadData(startDate = '', endDate = '', category = '', secondCategory = '' , target = '') {
             let urlTransaction = 'http://localhost:3100/getTransaksi'; // Ensure this is correct
 
             const data = {
                 start_date: startDate,
                 end_date: endDate,
                 category: category,
-                second_category: secondCategory // Add second category as a parameter
+                second_category: secondCategory, // Add second category as a parameter
+                target: target, // Add second category as a parameter
+                
             };
 
             fetch(urlTransaction, {
@@ -224,7 +170,9 @@
         function renderData(data) {
             if (!tableTransaction) {
                 tableTransaction = $('#myTable').DataTable({
-                    ordering: true,
+                    rderCellsTop: true,
+                    fixedHeader: true,
+                    // ordering: true,
                     order: [],
                 });
             }
@@ -234,14 +182,34 @@
             // Filter out rows where jumlah_transaksi is not greater than comparison_result
             // const filteredData = data.filter(item => item.jumlah_transaksi > item.comparison_result);
 
-            tableTransaction.rows.add(data.map(item => [
-                item.kode_produk,
-                item.jumlah_transaksi,
-                item.harga,
-                item.harga_beli,
-                item.selisih,
-                (Math.round((item.selisih / item.harga_beli) * 100) / 100)
-            ]));
+            tableTransaction.rows.add(data.map(item => {
+                const kode_produk = item.kode_produk;
+                const jumlah_transaksi = item.jumlah_transaksi;
+                const harga_beli = item.harga_beli;
+                const beli_total = item.beli_total;
+                const harga_jual = item.harga_jual;
+                const jual_total = item.jual_total;
+                const profit_item = item.profit;
+                const profit_total = item.profit_total;
+                const percent_item = Math.round(((profit_item / harga_beli) * 100) * 100) / 100;
+                const percent_total = Math.round(((profit_total / beli_total) * 100) * 100) / 100;
+                const margin_toko = item.profit_total - item.komisi_total;
+                const margin_server = item.komisi_total;
+                return [
+                    kode_produk,
+                    jumlah_transaksi,
+                    harga_beli,
+                    beli_total,
+                    harga_jual,
+                    jual_total,
+                    profit_item,
+                    profit_total,
+                    percent_item,
+                    percent_total,
+                    margin_toko,
+                    margin_server,
+                ]
+            }));
             tableTransaction.draw();
         }
 
@@ -278,15 +246,29 @@
             });
 
             // When the first category is changed
-            $('#selected').on('change', function() {
+            $('#dateRangePicker').val('');
+            $('#category').on('change', function() {
                 const selectedCategory = $(this).val();
                 const secondSelectedCategory = $('#secondSelect').val(); // Get second category value
                 const dateRange = $('#dateRangePicker').val().split(' - ');
                 const startDate = dateRange[0];
                 const endDate = dateRange[1];
-                loadData(startDate, endDate, selectedCategory, secondSelectedCategory);
+                const targetWinning = $('#Winning').val();
+                const targetLoser = $('#Loser').val();
+                let target = 'kosong';
+
+                if(selectedCategory == 'winning' || selectedCategory == 'traffic'){
+                    target = targetWinning;
+                }else{
+                    target = targetLoser;           
+                }
+                console.log(target);
+                
+                
+                loadData(startDate, endDate, selectedCategory, secondSelectedCategory, target);
                 loadTabel(startDate, endDate, selectedCategory, secondSelectedCategory);
             });
+
 
             // When the second category is changed (multiple selection)
             $('#secondSelect').on('change', function() {
@@ -300,7 +282,4 @@
         });
     </script>
 
-</body>
-
-</html>
 <?= $this->endSection(); ?>
