@@ -11,7 +11,7 @@
             <input hidden type="text" name="<?= $target['category']; ?>" value="<?= $target['amount'] . ';' . $target['category'] . ';' . $target['profit']; ?>" id="<?= $target['category']; ?>">
         <?php endforeach; ?>
         <label for="dateRangePicker">Pilih Rentang Tanggal:</label>
-        <input placeholder="2025-04-21 - 2025-04-21" type="text" id="dateRangePicker" name="daterange" />
+        <input  type="text" id="dateRangePicker" name="daterange" />
     </div>
 
     <!-- First Category Dropdown (Single Select) -->
@@ -34,6 +34,7 @@
             <option value="ewalet">E-walet</option>
             <option value="tagihan">Tagihan</option>
             <option value="game">Game</option>
+            <option value="transfer">Transfer</option>
         </select>
     </div>
 </div>
@@ -52,13 +53,13 @@
         </tr>
         <tr>
             <th>Satuan</th>
-            <th>Jumlah</th>
+            <th>Total</th>
             <th>Satuan</th>
-            <th>Jumlah</th>
+            <th>Total</th>
             <th>Satuan</th>
-            <th>Jumlah</th>
+            <th>Total</th>
             <th>Satuan</th>
-            <th>Jumlah</th>
+            <th>Total</th>
             <th>Toko</th>
             <th>Server</th>
         </tr>
@@ -183,16 +184,22 @@
         tableTransaction.rows.add(data.map(item => {
             const kode_produk = item.kode_produk;
             const jumlah_transaksi = item.jumlah_transaksi;
-            const harga_beli = item.harga_beli;
-            const beli_total = item.beli_total;
-            const harga_jual = item.harga_jual;
-            const jual_total = item.jual_total;
-            const profit_item = item.profit;
-            const profit_total = item.profit_total;
-            const percent_item = Math.round(((profit_item / harga_beli) * 100) * 100) / 100;
-            const percent_total = Math.round(((profit_total / beli_total) * 100) * 100) / 100;
-            const margin_toko = item.profit_total - item.komisi_total;
-            const margin_server = item.komisi_total;
+
+            const toRupiah = (value) => new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 0
+            }).format(value);
+
+            const harga_beli = toRupiah(item.harga_beli);
+            const beli_total = toRupiah(item.beli_total);
+            const harga_jual = toRupiah(item.harga_jual);
+            const jual_total = toRupiah(item.jual_total);
+            const profit_item = toRupiah(item.profit);
+            const profit_total = toRupiah(item.profit_total);
+            const margin_toko = toRupiah(item.profit_total - item.komisi_total);
+            const margin_server = toRupiah(item.komisi_total);
+            const percent_item = Math.round(((item.profit / item.harga_beli) * 100) * 100) / 100;
+            const percent_total = Math.round(((item.profit_total / item.beli_total) * 100) * 100) / 100;
+    
             return [
                 kode_produk,
                 jumlah_transaksi,

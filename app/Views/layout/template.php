@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Target Product Peformance Matrix</title>
+    <title><?= $title;?></title>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <link href="<?= base_url('css/styles.css'); ?>" rel="stylesheet" />
+    <link rel="stylesheet" href="<?= base_url('css/styles.css'); ?>"  />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 
 
@@ -138,6 +138,10 @@
                         <a class="nav-link" href="/peformance">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-bullseye"></i></div>
                             Target
+                        </a>
+                        <a class="nav-link" href="/blur">
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-bullseye"></i></div>
+                            Realtime
                         </a>
                     </div>
                 </div>

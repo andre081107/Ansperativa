@@ -18,6 +18,7 @@ $routes->get('/pages/product', 'ProductController::index');
 $routes->post('/pages/bulk', 'BulkController::about');
 $routes->post('/pages/bulk', 'BulkController::about');
 $routes->get('parsing/delete/(:segment)/(:segment)', 'ParsingController::delete/$1/$2');
-$routes->get('/pages/maha', 'MahaController::index');
+// $routes->get('/pages/maha', 'MahaController::index');
 $routes->get('peformance', 'PeformanceMatrixController::index');
 $routes->post('peformance', 'PeformanceMatrixController::save');
+$routes->get('blur', 'RealtimeController::index');
